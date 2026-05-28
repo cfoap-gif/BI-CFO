@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { INSTITUTIONAL_EMAIL_DOMAIN } from "@/lib/auth/constants";
 
+const INPUT_CLASS =
+  "mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 hover:border-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/20";
+
 export function LoginForm() {
   const router = useRouter();
   const [login, setLogin] = useState("");
@@ -40,7 +43,10 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="login" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="login"
+          className="block text-sm font-medium text-slate-700"
+        >
           Login
         </label>
         <input
@@ -51,13 +57,16 @@ export function LoginForm() {
           required
           value={login}
           onChange={(e) => setLogin(e.target.value)}
-          className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+          className={INPUT_CLASS}
           placeholder="ex.: admin"
         />
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="password"
+          className="block text-sm font-medium text-slate-700"
+        >
           Senha
         </label>
         <input
@@ -68,12 +77,15 @@ export function LoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none"
+          className={INPUT_CLASS}
         />
       </div>
 
       {error && (
-        <p className="text-sm text-red-600" role="alert">
+        <p
+          role="alert"
+          className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
+        >
           {error}
         </p>
       )}
@@ -81,7 +93,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800 disabled:opacity-50"
+        className="inline-flex w-full items-center justify-center rounded-md bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/40 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPending ? "Entrando..." : "Entrar"}
       </button>
