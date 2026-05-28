@@ -9,7 +9,7 @@
 -- Procedimento manual obrigatório ANTES de rodar esta migração:
 --
 --   1) No Supabase Dashboard → Authentication → Users → Add user:
---        - Email:    admin@bi-cfo.local
+--        - Email:    admin@abm.br
 --        - Password: <senha aleatória forte gerada localmente>
 --        - Auto Confirm User: SIM (Confirm email = DESLIGADO no provider)
 --      Anote a senha em local seguro (gerenciador de senhas). Ela será trocada
@@ -34,12 +34,12 @@ begin
   -- Localiza o usuário criado manualmente em auth.users.
   select id into v_admin_uid
     from auth.users
-   where email = 'admin@bi-cfo.local'
+   where email = 'admin@abm.br'
    limit 1;
 
   if v_admin_uid is null then
     raise exception
-      'Usuário admin@bi-cfo.local não encontrado em auth.users. '
+      'Usuário admin@abm.br não encontrado em auth.users. '
       'Crie-o pelo Dashboard antes de rodar esta migração (ver cabeçalho).';
   end if;
 

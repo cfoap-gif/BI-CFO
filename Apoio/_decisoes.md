@@ -6,13 +6,15 @@ Este documento registra decisões técnicas formais do projeto. Cada decisão te
 
 ---
 
-## DT-001 — Autenticação institucional via e-mail técnico fictício
+## DT-001 — Autenticação institucional via e-mail técnico
 
-**Status:** ativa
+**Status:** ativa (revisada em 2026-05-28 — domínio alterado de `bi-cfo.local` para `abm.br`)
 **Marco:** M0
 **Data:** 2026-05-28
 
-**Decisão.** O sistema usa **Supabase Auth (email + password)** com **e-mail técnico/fictício** derivado do login institucional, no formato `{login}@bi-cfo.local`. O usuário digita apenas o login (ex.: `admin`, `cad.silva`); o frontend completa com o sufixo antes de chamar `signInWithPassword`.
+**Decisão.** O sistema usa **Supabase Auth (email + password)** com **e-mail técnico institucional** derivado do login, no formato `{login}@abm.br`. O usuário digita apenas o login (ex.: `admin`, `cad.silva`); o frontend completa com o sufixo `@abm.br` antes de chamar `signInWithPassword`.
+
+> **Histórico.** Versão inicial usava `@abm.br` (domínio reservado RFC 6762). Alterado para `@abm.br` por preferência institucional do CBMAP/ABM. Como `Confirm email` e `Magic link` estão DESLIGADOS no provider, nenhuma mensagem real é enviada para o domínio, independentemente de ele ser roteável ou não. A constante única `INSTITUTIONAL_EMAIL_DOMAIN` em `lib/auth/constants.ts` permite trocar novamente no futuro com baixo custo.
 
 **Configuração do provider Supabase (Auth → Providers → Email):**
 - `Confirm email`: **DESLIGADO**.
@@ -48,7 +50,7 @@ Este documento registra decisões técnicas formais do projeto. Cada decisão te
 - `public.users`: leitura permitida apenas para `id = auth.uid()`. Nenhuma política de INSERT/UPDATE/DELETE → mudanças apenas via seed/service_role.
 
 O **bootstrap do administrador inicial** é feito em duas etapas (descritas em `supabase/migrations/0003_seed_admin.sql`):
-1. Criação manual de `auth.users` via Dashboard Supabase (e-mail `admin@bi-cfo.local`, senha aleatória forte, auto-confirmado).
+1. Criação manual de `auth.users` via Dashboard Supabase (e-mail `admin@abm.br`, senha aleatória forte, auto-confirmado).
 2. Migração `0003_seed_admin.sql` aplicada com role `service_role`/`postgres` (ignora RLS) que insere o registro correspondente em `public.users` com perfil Administrador.
 
 **Por quê.** Em um banco vazio com RLS estrita, não existe usuário capaz de "criar" o primeiro administrador — clássico problema do ovo e da galinha. A `service_role` resolve isso de forma segura, contanto que sua chave **nunca** seja exposta no client. Manter a senha do admin **fora** do SQL versionado evita vazamento histórico no Git.

@@ -57,7 +57,7 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
 
 5. **Crie o administrador inicial** (procedimento manual, ver cabeçalho de `supabase/migrations/0003_seed_admin.sql`):
    - Dashboard → Authentication → Users → **Add user**:
-     - Email: `admin@bi-cfo.local`
+     - Email: `admin@abm.br`
      - Password: senha forte aleatória (anote em gerenciador de senhas)
      - Auto confirm user: **sim**
    - Confirme que `Authentication → Providers → Email`:
@@ -96,7 +96,7 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
 │   ├── login/           # Tela de login institucional
 │   └── dashboard/       # Rota protegida (M0: vazia, só identidade do usuário)
 ├── lib/
-│   ├── auth/            # Constantes de auth (domínio @bi-cfo.local)
+│   ├── auth/            # Constantes de auth (domínio @abm.br)
 │   └── supabase/        # Clientes browser e server
 ├── proxy.ts             # Proteção de rotas + refresh de sessão Supabase (Next 16: antigo middleware.ts)
 ├── supabase/
