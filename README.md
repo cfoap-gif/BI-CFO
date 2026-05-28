@@ -10,7 +10,7 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
 
 ## Stack
 
-- **Next.js 15** (App Router) + **React 19** + **TypeScript** strict
+- **Next.js 16** (App Router) + **React 19** + **TypeScript** strict
 - **Tailwind CSS v4**
 - **Supabase** (PostgreSQL + Auth + Storage + RLS)
 - **Vercel** (deploy)
