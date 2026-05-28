@@ -31,15 +31,26 @@ export default async function DashboardPage() {
       </div>
 
       {canManageCadastros && (
-        <Link
-          href="/cadastros"
-          className="block rounded-xl border border-gray-200 bg-white p-6 transition hover:border-gray-900 hover:shadow-sm"
-        >
-          <h3 className="text-base font-semibold text-gray-900">Cadastros</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Pelotões, militares, locais, disciplinas e alunos.
-          </p>
-        </Link>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Link
+            href="/cadastros"
+            className="block rounded-xl border border-gray-200 bg-white p-6 transition hover:border-gray-900 hover:shadow-sm"
+          >
+            <h3 className="text-base font-semibold text-gray-900">Cadastros</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Pelotões, militares, locais, disciplinas e alunos.
+            </p>
+          </Link>
+          <Link
+            href="/escalas"
+            className="block rounded-xl border border-gray-200 bg-white p-6 transition hover:border-gray-900 hover:shadow-sm"
+          >
+            <h3 className="text-base font-semibold text-gray-900">Escalas</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Serviços diários, permanência, missões e apoio.
+            </p>
+          </Link>
+        </div>
       )}
 
       <div className="rounded-xl border border-gray-200 bg-white p-6">
