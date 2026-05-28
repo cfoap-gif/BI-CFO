@@ -1,0 +1,74 @@
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { signOut } from "./actions";
+
+type UserRow = {
+  login: string;
+  full_name: string;
+  war_name: string | null;
+  profiles: { name: string } | null;
+};
+
+export default async function DashboardPage() {
+  const supabase = await createSupabaseServerClient();
+
+  const { data: userRow, error } = await supabase
+    .from("users")
+    .select("login, full_name, war_name, profiles(name)")
+    .single<UserRow>();
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-gray-900">Dashboard</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Marco M0 — fundação técnica. Funcionalidades de negócio chegam no M1.
+        </p>
+      </div>
+
+      <div className="rounded-xl border border-gray-200 bg-white p-6">
+        <h3 className="text-sm font-medium uppercase tracking-wide text-gray-500">
+          Usuário autenticado
+        </h3>
+        {error || !userRow ? (
+          <p className="mt-3 text-sm text-red-600">
+            Não foi possível ler o registro institucional do usuário (
+            {error?.message ?? "registro ausente em public.users"}). Verifique
+            o seed e as políticas de RLS.
+          </p>
+        ) : (
+          <dl className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-gray-500">Login</dt>
+              <dd className="font-medium text-gray-900">{userRow.login}</dd>
+            </div>
+            <div>
+              <dt className="text-gray-500">Nome completo</dt>
+              <dd className="font-medium text-gray-900">{userRow.full_name}</dd>
+            </div>
+            <div>
+              <dt className="text-gray-500">Nome de guerra</dt>
+              <dd className="font-medium text-gray-900">
+                {userRow.war_name ?? "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-gray-500">Perfil</dt>
+              <dd className="font-medium text-gray-900">
+                {userRow.profiles?.name ?? "—"}
+              </dd>
+            </div>
+          </dl>
+        )}
+      </div>
+
+      <form action={signOut}>
+        <button
+          type="submit"
+          className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+        >
+          Sair
+        </button>
+      </form>
+    </div>
+  );
+}
