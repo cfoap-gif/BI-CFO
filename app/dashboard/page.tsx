@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentProfileName, isAdminLike } from "@/lib/auth/profile";
 import { signOut } from "./actions";
 
 type UserRow = {
@@ -16,14 +18,29 @@ export default async function DashboardPage() {
     .select("login, full_name, war_name, profiles(name)")
     .single<UserRow>();
 
+  const profile = await getCurrentProfileName();
+  const canManageCadastros = isAdminLike(profile);
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-semibold text-gray-900">Dashboard</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Marco M0 — fundação técnica. Funcionalidades de negócio chegam no M1.
+          Marco M1 — cadastros institucionais disponíveis.
         </p>
       </div>
+
+      {canManageCadastros && (
+        <Link
+          href="/cadastros"
+          className="block rounded-xl border border-gray-200 bg-white p-6 transition hover:border-gray-900 hover:shadow-sm"
+        >
+          <h3 className="text-base font-semibold text-gray-900">Cadastros</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Pelotões, militares, locais, disciplinas e alunos.
+          </p>
+        </Link>
+      )}
 
       <div className="rounded-xl border border-gray-200 bg-white p-6">
         <h3 className="text-sm font-medium uppercase tracking-wide text-gray-500">

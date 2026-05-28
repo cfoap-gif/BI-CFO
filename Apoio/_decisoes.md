@@ -97,8 +97,43 @@ O PDF é sempre gerado a partir de `bulletin_items` — itens congelados, copiad
 
 ---
 
+## DT-004 — Helper `public.user_profile_name()` e padrão de RLS por perfil (M1)
+
+**Status:** ativa
+**Marco:** M1
+**Data:** 2026-05-28
+
+**Decisão.** Para evitar repetir o JOIN `users → profiles` em toda policy de RLS, criamos a função SQL `public.user_profile_name()` em `0004_user_profile_name.sql`. Ela é `SECURITY DEFINER`, `STABLE`, com `search_path = public`, e retorna o nome do perfil do `auth.uid()` corrente (NULL se não houver registro ativo em `public.users`).
+
+A função tem `GRANT EXECUTE` apenas para `authenticated`. RLS é ignorada dentro da função, mas o output é apenas o nome do perfil (não vaza PII).
+
+**Padrão de policy adotado para as tabelas de cadastro institucional (M1):**
+
+- **SELECT** — `to authenticated using (true)`. Todos os usuários autenticados leem as 5 tabelas, porque cadastros alimentam selects de telas futuras (Livro de Dia, registros, escalas).
+- **INSERT/UPDATE** — `to authenticated with check (public.user_profile_name() in ('Administrador', 'Coordenação'))`. Apenas Admin e Coordenação escrevem.
+- **DELETE** — nenhuma policy → bloqueado. Inativação é feita via `active = false`. Regra do PRD §18 (registros vinculados a histórico não devem ser excluídos).
+
+Aplicado em: `platoons`, `military_staff`, `locations`, `disciplines`, `students`.
+
+A função `getCurrentProfileName()` (em `lib/auth/profile.ts`) é o equivalente server-side, chamada via `supabase.rpc("user_profile_name")` e usada como guard das páginas `/cadastros/*` no `app/cadastros/layout.tsx`.
+
+**Por quê.**
+- DRY em policies — `user_profile_name()` em uma policy substitui um subquery de 3 linhas.
+- A função encapsula a regra de "user ativo" — desativar `public.users.active = false` automaticamente revoga permissões de escrita sem alterar policies.
+- Mantém o nome do perfil como string legível na lógica de policy (vs. UUIDs), o que facilita revisão.
+
+**Alternativas consideradas.**
+- Subquery direto em cada policy: descartado — verbose e duplica lógica.
+- Usar `current_setting('request.jwt.claims')` para extrair role: descartado — exigiria sincronizar perfil no JWT custom claim, mais complexidade no MVP.
+- Trigger que copia o profile_id para um campo `auth.users.raw_app_meta_data`: descartado pelo mesmo motivo.
+
+**Consequências.**
+- Toda nova policy de M2+ usa o mesmo helper. Se a regra de "quem é admin-like" mudar, atualiza-se a função (ou as listas em `lib/auth/profile.ts`) e as policies seguem.
+- Policies baseadas em pelotão (futuro Coord de Pelotão) virão a partir de M3, com helper adicional `user_platoon_id()` ou similar.
+
+---
+
 ## Próximas decisões esperadas (a registrar quando ocorrerem)
 
-- **DT-004 (M1)** — função auxiliar `auth.user_profile_name()` e padrão de políticas RLS por perfil.
 - **DT-005 (M3)** — adoção de tabela central `records` em vez de tabelas especializadas no MVP (com plano de migração para fases futuras).
 - **DT-006 (M6)** — escolha definitiva do motor de PDF (`@react-pdf/renderer` planejado; reavaliar conforme requisitos visuais).
