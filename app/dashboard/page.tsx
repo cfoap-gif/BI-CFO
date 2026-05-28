@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getCurrentProfileName, isAdminLike } from "@/lib/auth/profile";
+import {
+  getCurrentProfileName,
+  isAdminLike,
+  isDailyBookUser,
+} from "@/lib/auth/profile";
 import { signOut } from "./actions";
 
 type UserRow = {
@@ -20,6 +24,7 @@ export default async function DashboardPage() {
 
   const profile = await getCurrentProfileName();
   const canManageCadastros = isAdminLike(profile);
+  const canOpenDailyBook = isDailyBookUser(profile);
 
   return (
     <div className="space-y-6">
@@ -30,8 +35,8 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {canManageCadastros && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {canManageCadastros && (
           <Link
             href="/cadastros"
             className="block rounded-xl border border-gray-200 bg-white p-6 transition hover:border-gray-900 hover:shadow-sm"
@@ -41,6 +46,8 @@ export default async function DashboardPage() {
               Pelotões, militares, locais, disciplinas e alunos.
             </p>
           </Link>
+        )}
+        {canManageCadastros && (
           <Link
             href="/escalas"
             className="block rounded-xl border border-gray-200 bg-white p-6 transition hover:border-gray-900 hover:shadow-sm"
@@ -50,8 +57,19 @@ export default async function DashboardPage() {
               Serviços diários, permanência, missões e apoio.
             </p>
           </Link>
-        </div>
-      )}
+        )}
+        {canOpenDailyBook && (
+          <Link
+            href="/livro-de-dia"
+            className="block rounded-xl border border-gray-200 bg-white p-6 transition hover:border-gray-900 hover:shadow-sm"
+          >
+            <h3 className="text-base font-semibold text-gray-900">Livro de Dia</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Registro diário da rotina + lançamentos.
+            </p>
+          </Link>
+        )}
+      </div>
 
       <div className="rounded-xl border border-gray-200 bg-white p-6">
         <h3 className="text-sm font-medium uppercase tracking-wide text-gray-500">

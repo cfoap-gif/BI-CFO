@@ -133,7 +133,50 @@ A função `getCurrentProfileName()` (em `lib/auth/profile.ts`) é o equivalente
 
 ---
 
+## DT-005 — Tabela central `records` no MVP (M3)
+
+**Status:** ativa
+**Marco:** M3
+**Data:** 2026-05-28
+
+**Decisão.** No MVP, **todos os fatos do CFO** (falta, atraso, baixa, instrução ministrada, missão, alteração de material, aviso, prescrição, ocorrência disciplinar, elogio, etc.) vivem numa **única tabela `public.records`**, discriminados por:
+
+- `record_type` (CHECK enumerado — falta, atraso, baixa, instrução ministrada, alteração de material, missão interna/externa, aviso, elogio, etc.);
+- `source_type` (origem do registro — `daily_book`, `duty_scale`, `manual`, etc.);
+- `source_id` (FK lógica para a entidade de origem);
+- `daily_book_id` (FK forte para o Livro de Dia que originou o registro, quando aplicável).
+
+**Campos centrais para o ciclo documental:**
+- `original_description` — texto original (preservado, jamais sobrescrito);
+- `publication_text` — texto editado pela Coordenação para o BI (preenchido em M4);
+- `classification` — `publicável | interno | restrito` (definido pela Coordenação);
+- `status` — rascunho → enviado → em revisão → pendente de correção → validado → incluído no BI / interno / restrito / cancelado / arquivado;
+- `include_in_bulletin` (boolean);
+- `bulletin_part` (1..5).
+
+**Por quê.**
+- Modelo §32-§33 recomenda essa abordagem. Lançar o MVP rapidamente sem fragmentar em 8+ tabelas especializadas (`absences`, `missions`, `material_changes`, ...).
+- Toda a lógica de validação, classificação e congelamento de `bulletin_items` opera sobre essa tabela única — simplifica services, queries e RLS.
+- Permite que **DT-003 (PDF gerado só de `bulletin_items`)** continue valendo: o ciclo `records → bulletin_items → PDF` é o mesmo independente do `record_type`.
+
+**Alternativas consideradas.**
+- Tabelas especializadas desde o dia 1 (PRD §18.9 a §18.13): descartado para MVP — custo alto, ganho marginal no curto prazo.
+- Documento JSON-único: descartado — perde queryability e integridade referencial.
+
+**Plano de migração para fases futuras.**
+A partir do M3+α (provavelmente fase 3 do roadmap, após MVP estabilizado), tabelas especializadas podem ser introduzidas progressivamente. Para cada especialização (ex.: `health_records`):
+1. Criar `public.health_records` com campos específicos (incluindo `restricted_details`, `event_type`).
+2. Backfill: para cada linha em `records` com `record_type = 'baixa'`, criar linha equivalente em `health_records` e atualizar `records.source_type='health_record'`, `records.source_id=<novo_id>`.
+3. Manter `records` como a tabela "índice" do documental — `bulletin_items` continuam referenciando `records` via `source_type`/`source_id`.
+4. A interface de UX pode passar a usar a tabela especializada para a entrada, mas o pipeline de publicação no BI continua passando por `records`.
+
+**Consequências.**
+- `records.original_description` é a única fonte de verdade textual do registro até a Coordenação editar `publication_text`. Edições no `original_description` são bloqueadas após `status='enviado'` (regra aplicada nas Server Actions; reforço por trigger futuro).
+- `records.classification = 'restrito'` é protegido na própria RLS (policy `records_read` aplica filtro).
+- Tabelas especializadas, quando criadas, NÃO são consultadas pelo PDF — o pipeline documental sempre passa por `records` → `bulletin_items`.
+
+---
+
 ## Próximas decisões esperadas (a registrar quando ocorrerem)
 
-- **DT-005 (M3)** — adoção de tabela central `records` em vez de tabelas especializadas no MVP (com plano de migração para fases futuras).
 - **DT-006 (M6)** — escolha definitiva do motor de PDF (`@react-pdf/renderer` planejado; reavaliar conforme requisitos visuais).
