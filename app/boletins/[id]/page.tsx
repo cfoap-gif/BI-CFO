@@ -45,10 +45,6 @@ type EventRow = {
   created_at: string;
 };
 
-function partLabel(n: number): string {
-  return BULLETIN_PARTS.find((p) => p.value === String(n))?.label ?? `Parte ${n}`;
-}
-
 type SearchParams = Promise<{ ok?: string; err?: string }>;
 
 export default async function BulletinDetailPage({
