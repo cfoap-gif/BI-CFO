@@ -3,7 +3,7 @@
 **Data:** 2026-05-28
 **Marco:** M4
 **Épico:** 4 — Validação da Coordenação (US-018 a US-022)
-**Status:** aprovado
+**Status:** implementado (código no branch `feat/m4-validacao`; falta aplicar a migration `0013` no Supabase e rodar o checklist manual)
 
 ## Contexto
 

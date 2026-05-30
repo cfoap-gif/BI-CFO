@@ -4,7 +4,7 @@ Sistema web institucional para o **Curso de Formação de Oficiais (CFO)** da Ac
 
 Centraliza o registro da rotina acadêmico-militar, aplica validação da Coordenação e gera o **Boletim Interno** oficial em PDF a partir de itens validados e congelados.
 
-> **Estado atual:** Marco **M0 — Fundação**. Apenas infraestrutura técnica + autenticação. Nenhuma funcionalidade de negócio implementada ainda. Veja `Apoio/_decisoes.md` (DT-003) para a arquitetura documental que será construída a partir do M1.
+> **Estado atual:** Marco **M4 — Validação da Coordenação**. Já implementados: fundação técnica + auth (M0), cadastros institucionais (M1), escalas (M2), Livro de Dia + tabela central `records` (M3) e o fluxo de validação da Coordenação — fila com filtros, validar/devolver/classificar, edição do texto de publicação e histórico imutável em `record_events` (M4). Veja `Apoio/_decisoes.md` (DT-003) para a invariante do fluxo documental. A geração do Boletim Interno em PDF (`bulletins`/`bulletin_items`) entra a partir do M5.
 
 ---
 
