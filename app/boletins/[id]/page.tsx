@@ -14,6 +14,7 @@ import {
   approveBulletin,
   reopenBulletin,
   cancelBulletin,
+  archiveBulletinPdf,
 } from "./actions";
 
 type Bulletin = {
@@ -26,6 +27,8 @@ type Bulletin = {
   type: string;
   status: string;
   approved_at: string | null;
+  pdf_path: string | null;
+  pdf_generated_at: string | null;
 };
 
 type Item = {
@@ -61,7 +64,7 @@ export default async function BulletinDetailPage({
   const { data: bRaw } = await supabase
     .from("bulletins")
     .select(
-      "id, number, year, publication_date, start_date, end_date, type, status, approved_at",
+      "id, number, year, publication_date, start_date, end_date, type, status, approved_at, pdf_path, pdf_generated_at",
     )
     .eq("id", id)
     .maybeSingle();
@@ -111,6 +114,14 @@ export default async function BulletinDetailPage({
             Baixar PDF
           </Link>
         )}
+        {b.pdf_path && (
+          <Link
+            href={`/boletins/${b.id}/arquivo`}
+            className="text-sm font-medium text-slate-900 hover:underline"
+          >
+            Baixar PDF arquivado
+          </Link>
+        )}
       </PageHeader>
 
       <div className="mb-4 flex items-center gap-2">
@@ -157,6 +168,19 @@ export default async function BulletinDetailPage({
         {isApproved && b.approved_at && (
           <span className="text-xs text-emerald-700">
             Aprovado em {new Date(b.approved_at).toLocaleString("pt-BR")}
+          </span>
+        )}
+        {isApproved && (
+          <form action={archiveBulletinPdf}>
+            <input type="hidden" name="id" value={b.id} />
+            <SubmitButton variant="secondary">
+              {b.pdf_path ? "Atualizar PDF arquivado" : "Arquivar PDF"}
+            </SubmitButton>
+          </form>
+        )}
+        {b.pdf_generated_at && (
+          <span className="text-xs text-slate-600">
+            PDF arquivado em {new Date(b.pdf_generated_at).toLocaleString("pt-BR")}
           </span>
         )}
       </div>

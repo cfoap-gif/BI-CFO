@@ -4,7 +4,7 @@ Sistema web institucional para o **Curso de Formação de Oficiais (CFO)** da Ac
 
 Centraliza o registro da rotina acadêmico-militar, aplica validação da Coordenação e gera o **Boletim Interno** oficial em PDF a partir de itens validados e congelados.
 
-> **Estado atual:** Marco **M6 — Geração de PDF**. Já implementados: fundação técnica + auth (M0), cadastros institucionais (M1), escalas (M2), Livro de Dia + tabela central `records` (M3), validação da Coordenação (M4), criação/montagem/aprovação de Boletins Internos com prévia HTML (M5) e download de PDF formal a partir de `bulletin_items` congelados (M6). Veja `Apoio/_decisoes.md` (DT-003/DT-006/DT-007) para as invariantes do fluxo documental.
+> **Estado atual:** Marco **M7 — Repositório documental (em curso)**. Já implementados: fundação técnica + auth (M0), cadastros institucionais (M1), escalas (M2), Livro de Dia + tabela central `records` (M3), validação da Coordenação (M4), criação/montagem/aprovação de Boletins Internos com prévia HTML (M5), download de PDF formal a partir de `bulletin_items` congelados (M6) e arquivamento simples do PDF em Supabase Storage (M7 parcial). Veja `Apoio/_decisoes.md` (DT-003/DT-006/DT-007) para as invariantes do fluxo documental.
 
 ---
 
@@ -68,6 +68,7 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
    - `supabase/migrations/0014_bulletins.sql`
    - `supabase/migrations/0015_bulletin_items_freeze.sql`
    - `supabase/migrations/0016_assemble_bulletin_items_rpc.sql`
+   - `supabase/migrations/0017_bulletin_pdf_archive.sql`
 
    > A `0003_seed_admin.sql` é aplicada no passo 5 (depende da criação manual do
    > usuário admin). A ordem importa: cada migração referencia objetos criados
@@ -138,7 +139,7 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
 | M4    | Validação da Coordenação                                       | implementado |
 | M5    | Boletim Interno + prévia                                       | implementado |
 | M6    | Geração de PDF (a partir de `bulletin_items`)                  | implementado |
-| M7    | Repositório documental                                         | próximo |
+| M7    | Repositório documental                                         | em curso |
 | M8    | Auditoria + hardening                                          | pendente |
 
 ---

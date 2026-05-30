@@ -10,6 +10,7 @@ import {
   BULLETIN_EVENT_BY_TARGET,
   type BulletinStatus,
 } from "@/lib/boletins/status";
+import { archiveBulletinPdf as archiveBulletinPdfFile } from "@/lib/pdf/archive";
 
 function base(id: string): string {
   return `/boletins/${id}`;
@@ -276,4 +277,25 @@ export async function cancelBulletin(formData: FormData) {
   }
   revalidatePath(base(id));
   redirect(`${base(id)}${buildQuery({ ok: "Boletim cancelado." })}`);
+}
+
+/** Gera e salva o PDF aprovado no Storage privado. */
+export async function archiveBulletinPdf(formData: FormData) {
+  const id = getString(formData, "id", { required: true });
+  try {
+    const { supabase, user, bulletin } = await loadGuarded(id);
+    if (bulletin.status !== "aprovado") {
+      throw new Error("Apenas boletins aprovados podem ser arquivados em PDF.");
+    }
+
+    await archiveBulletinPdfFile({
+      supabase,
+      bulletinId: id,
+      userId: user.id,
+    });
+  } catch (e) {
+    redirect(`${base(id)}${buildQuery({ err: shortError(e) })}`);
+  }
+  revalidatePath(base(id));
+  redirect(`${base(id)}${buildQuery({ ok: "PDF arquivado." })}`);
 }
