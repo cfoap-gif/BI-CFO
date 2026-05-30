@@ -51,9 +51,24 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
    `.env.local` é ignorado pelo Git e **nunca** deve ser commitado.
 
 4. **Aplique as migrações Supabase.**
-   Pelo Dashboard → SQL Editor, execute em ordem:
+   Pelo Dashboard → SQL Editor, execute **em ordem, uma de cada vez** (todas são
+   idempotentes — `create table if not exists` / `create or replace`):
    - `supabase/migrations/0001_init.sql`
    - `supabase/migrations/0002_seed_profiles.sql`
+   - `supabase/migrations/0004_user_profile_name.sql`
+   - `supabase/migrations/0005_platoons.sql`
+   - `supabase/migrations/0006_military_staff.sql`
+   - `supabase/migrations/0007_locations.sql`
+   - `supabase/migrations/0008_disciplines.sql`
+   - `supabase/migrations/0009_students.sql`
+   - `supabase/migrations/0010_duty_scales.sql`
+   - `supabase/migrations/0011_daily_books.sql`
+   - `supabase/migrations/0012_records.sql`
+   - `supabase/migrations/0013_record_events.sql`
+
+   > A `0003_seed_admin.sql` é aplicada no passo 5 (depende da criação manual do
+   > usuário admin). A ordem importa: cada migração referencia objetos criados
+   > pelas anteriores (ex.: a `0005` usa `public.user_profile_name()` da `0004`).
 
 5. **Crie o administrador inicial** (procedimento manual, ver cabeçalho de `supabase/migrations/0003_seed_admin.sql`):
    - Dashboard → Authentication → Users → **Add user**:
