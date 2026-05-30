@@ -79,9 +79,11 @@ export default async function ValidacaoQueuePage({
     .order("reference_date", { ascending: false })
     .order("created_at", { ascending: false });
 
-  // Filtro de status: específico, ou o conjunto padrão da fila.
-  if (status) {
-    query = query.eq("status", status);
+  // Filtro de status: específico (validado contra ALL_STATUSES), ou o conjunto padrão da fila.
+  const validStatus =
+    status && (ALL_STATUSES as string[]).includes(status) ? status : undefined;
+  if (validStatus) {
+    query = query.eq("status", validStatus);
   } else {
     query = query.in("status", QUEUE_STATUSES);
   }

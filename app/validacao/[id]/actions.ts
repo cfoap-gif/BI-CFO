@@ -123,6 +123,9 @@ export async function validateRecord(formData: FormData) {
     // Parte do BI só faz sentido quando incluído.
     const partRaw = getInteger(formData, "bulletin_part", { min: 1, max: 5 });
     const bulletin_part = include_in_bulletin ? partRaw : null;
+    if (include_in_bulletin && bulletin_part == null) {
+      throw new Error("Selecione a parte do BI para incluir o registro no Boletim.");
+    }
 
     const { error } = await supabase
       .from("records")
@@ -187,12 +190,14 @@ export async function returnForCorrection(formData: FormData) {
 export async function updatePublicationText(formData: FormData) {
   const id = getString(formData, "id", { required: true });
   try {
-    const profile = await getCurrentProfileName();
-    if (!isAdminLike(profile)) {
-      throw new Error("Apenas a Coordenação pode editar o texto de publicação.");
+    const { supabase, record } = await loadGuarded(id);
+    // Não permite editar texto de registros em estado terminal.
+    if (["cancelado", "arquivado"].includes(record.status)) {
+      throw new Error(
+        `Não é possível editar o texto de um registro "${record.status}".`,
+      );
     }
     const publication_text = getOptionalString(formData, "publication_text") ?? "";
-    const supabase = await createSupabaseServerClient();
     const { error } = await supabase
       .from("records")
       .update({ publication_text })
