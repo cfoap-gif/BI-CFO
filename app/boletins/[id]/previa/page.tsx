@@ -60,12 +60,22 @@ export default async function BulletinPreviewPage({
         <Link href={`/boletins/${b.id}`} className="text-sm text-gray-600 hover:text-gray-900">
           ← Gestão
         </Link>
-        {b.status === "rascunho" && (
-          <form action={approveBulletin}>
-            <input type="hidden" name="id" value={b.id} />
-            <SubmitButton>Aprovar para PDF</SubmitButton>
-          </form>
-        )}
+        <div className="flex items-center gap-3">
+          {b.status === "aprovado" && (
+            <Link
+              href={`/boletins/${b.id}/pdf`}
+              className="text-sm font-medium text-slate-900 hover:underline"
+            >
+              Baixar PDF
+            </Link>
+          )}
+          {b.status === "rascunho" && (
+            <form action={approveBulletin}>
+              <input type="hidden" name="id" value={b.id} />
+              <SubmitButton>Aprovar para PDF</SubmitButton>
+            </form>
+          )}
+        </div>
       </div>
 
       {/* Documento A4-like */}

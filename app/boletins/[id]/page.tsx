@@ -103,6 +103,14 @@ export default async function BulletinDetailPage({
         >
           Ver prévia
         </Link>
+        {isApproved && (
+          <Link
+            href={`/boletins/${b.id}/pdf`}
+            className="text-sm font-medium text-slate-900 hover:underline"
+          >
+            Baixar PDF
+          </Link>
+        )}
       </PageHeader>
 
       <div className="mb-4 flex items-center gap-2">

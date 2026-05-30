@@ -4,7 +4,7 @@ Sistema web institucional para o **Curso de Formação de Oficiais (CFO)** da Ac
 
 Centraliza o registro da rotina acadêmico-militar, aplica validação da Coordenação e gera o **Boletim Interno** oficial em PDF a partir de itens validados e congelados.
 
-> **Estado atual:** Marco **M5 — Publicação do Boletim Interno**. Já implementados: fundação técnica + auth (M0), cadastros institucionais (M1), escalas (M2), Livro de Dia + tabela central `records` (M3), validação da Coordenação (M4) e criação/montagem/aprovação de Boletins Internos com prévia HTML em 5 partes (M5). Veja `Apoio/_decisoes.md` (DT-003/DT-006) para as invariantes do fluxo documental. A geração do PDF entra a partir do M6.
+> **Estado atual:** Marco **M6 — Geração de PDF**. Já implementados: fundação técnica + auth (M0), cadastros institucionais (M1), escalas (M2), Livro de Dia + tabela central `records` (M3), validação da Coordenação (M4), criação/montagem/aprovação de Boletins Internos com prévia HTML (M5) e download de PDF formal a partir de `bulletin_items` congelados (M6). Veja `Apoio/_decisoes.md` (DT-003/DT-006/DT-007) para as invariantes do fluxo documental.
 
 ---
 
@@ -101,6 +101,7 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
 | `npm run build` | Build de produção                          |
 | `npm run start` | Servidor de produção (após build)          |
 | `npm run lint`  | ESLint                                     |
+| `npm test`      | Testes automatizados                       |
 
 ---
 
@@ -136,8 +137,8 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
 | M3    | Livro de Dia + Registros                                       | implementado |
 | M4    | Validação da Coordenação                                       | implementado |
 | M5    | Boletim Interno + prévia                                       | implementado |
-| M6    | Geração de PDF (a partir de `bulletin_items`)                  | próximo |
-| M7    | Repositório documental                                         | pendente |
+| M6    | Geração de PDF (a partir de `bulletin_items`)                  | implementado |
+| M7    | Repositório documental                                         | próximo |
 | M8    | Auditoria + hardening                                          | pendente |
 
 ---

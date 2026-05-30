@@ -213,6 +213,40 @@ específica do documento, não do registro. Mantê-la em `bulletin_items` evita 
 
 ---
 
+## DT-007 — Motor de PDF server-side com React-PDF (M6)
+
+**Status:** ativa
+**Marco:** M6
+**Data:** 2026-05-30
+
+**Decisão.** A geração do PDF do Boletim Interno usa `@react-pdf/renderer` no
+servidor, em rota Node.js (`/boletins/[id]/pdf`), retornando um arquivo
+`application/pdf` para download.
+
+**Garantias preservadas (DT-003/DT-006):**
+- A rota e o loader de PDF leem apenas `bulletins` e `bulletin_items`.
+- O PDF só é gerado para BI `aprovado`.
+- O conteúdo publicado vem de `bulletin_items.content`, já congelado no M5.
+- Partes sem itens visíveis exibem "Sem alteração".
+
+**Por quê.** O PRD pede PDF por template. React-PDF permite expressar o documento
+como componentes React dedicados a PDF, sem depender de Chromium/headless browser no
+deploy e sem montar páginas linha por linha.
+
+**Alternativas consideradas.**
+- HTML + Playwright/Chromium: melhor paridade com a prévia HTML, mas maior custo
+  operacional e dependência de browser em produção.
+- Biblioteca PDF de baixo nível: mais controle, porém mais verbosa e menos aderente
+  ao modelo de template do PRD.
+
+**Consequências.**
+- A prévia HTML e o PDF são templates irmãos, não o mesmo CSS renderizado por dois
+  motores.
+- Supabase Storage, `pdf_url` e versionamento real de PDFs ficam para uma fatia
+  posterior do repositório documental.
+
+---
+
 ## Próximas decisões esperadas (a registrar quando ocorrerem)
 
-- **DT-007 (M6)** — escolha definitiva do motor de PDF (`@react-pdf/renderer` planejado; reavaliar conforme requisitos visuais).
+- **DT-008 (M7)** — estratégia do repositório documental: Storage, `pdf_url`, retenção e versionamento real.
