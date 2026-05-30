@@ -2,7 +2,7 @@
 
 **Marco:** M7 parcial
 **Data:** 2026-05-30
-**Status:** aprovado para implementação
+**Status:** implementado e verificado
 
 ## Contexto
 
@@ -62,3 +62,16 @@ armazenamento:
   - baixar PDF arquivado;
   - confirmar arquivo abre como PDF.
 
+## Registro de Verificação
+
+Em 2026-05-30, a migration `0017_bulletin_pdf_archive.sql` foi aplicada no
+Supabase e o fluxo foi testado com o BI `3/2026`.
+
+Resultado observado:
+
+- bucket privado `bulletins` existe;
+- `pdf_path` foi preenchido com
+  `2026/BI_CFO_2026_N003_28-05-2026_a_30-05-2026_v1.pdf`;
+- download do Storage retornou arquivo com header `%PDF-`;
+- arquivo gerado tinha 3371 bytes;
+- `npm test`, `npm run lint` e `npm run build` passaram após o teste real.
