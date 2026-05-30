@@ -65,55 +65,25 @@ async function logBulletinEvent(
  */
 export async function assembleItems(formData: FormData) {
   const id = getString(formData, "id", { required: true });
+  let assembledCount = 0;
   try {
     const { supabase, bulletin } = await loadGuarded(id);
     assertDraft(bulletin.status);
 
-    const { error: delErr } = await supabase
-      .from("bulletin_items")
-      .delete()
-      .eq("bulletin_id", id);
-    if (delErr) throw delErr;
-
-    const { data: recsRaw, error: recErr } = await supabase
-      .from("records")
-      .select("id, reference_date, title, publication_text, bulletin_part, source_type")
-      .eq("status", "validado")
-      .eq("classification", "publicável")
-      .eq("include_in_bulletin", true)
-      .gte("reference_date", bulletin.start_date)
-      .lte("reference_date", bulletin.end_date)
-      .order("bulletin_part", { ascending: true })
-      .order("reference_date", { ascending: true });
-    if (recErr) throw recErr;
-
-    const recs = recsRaw ?? [];
-    if (recs.length > 0) {
-      const orderByPart: { [part: number]: number } = {};
-      const rows = recs.map((r) => {
-        const part = r.bulletin_part ?? 3;
-        const order = orderByPart[part] ?? 0;
-        orderByPart[part] = order + 1;
-        return {
-          bulletin_id: id,
-          record_id: r.id,
-          part_number: part,
-          reference_date: r.reference_date,
-          title: r.title ?? "",
-          content: r.publication_text ?? "",
-          source_type: r.source_type ?? null,
-          display_order: order,
-          visible: true,
-        };
-      });
-      const { error: insErr } = await supabase.from("bulletin_items").insert(rows);
-      if (insErr) throw insErr;
-    }
+    const { data, error } = await supabase.rpc("assemble_bulletin_items", {
+      p_bulletin_id: id,
+    });
+    if (error) throw error;
+    assembledCount = typeof data === "number" ? data : 0;
   } catch (e) {
     redirect(`${base(id)}${buildQuery({ err: shortError(e) })}`);
   }
   revalidatePath(base(id));
-  redirect(`${base(id)}${buildQuery({ ok: "Itens montados a partir dos registros validados." })}`);
+  redirect(
+    `${base(id)}${buildQuery({
+      ok: `${assembledCount} item(ns) montado(s) a partir dos registros validados.`,
+    })}`,
+  );
 }
 
 /** Alterna a visibilidade de um item (só em rascunho). */

@@ -175,8 +175,44 @@ A partir do M3+α (provavelmente fase 3 do roadmap, após MVP estabilizado), tab
 - `records.classification = 'restrito'` é protegido na própria RLS (policy `records_read` aplica filtro).
 - Tabelas especializadas, quando criadas, NÃO são consultadas pelo PDF — o pipeline documental sempre passa por `records` → `bulletin_items`.
 
+## DT-006 — Congelamento na montagem + reabertura simples (M5)
+
+**Status:** ativa
+**Marco:** M5
+**Data:** 2026-05-30
+
+**Decisão.** Refina a DT-003. Os `bulletin_items` são copiados de
+`records.publication_text` **na montagem da prévia** (BI em `rascunho`), e tornam-se
+**imutáveis na aprovação** (BI `aprovado`). Antes só falávamos em "cópia no momento da
+aprovação"; na prática a prévia precisa ser editável (US-025: ocultar, reordenar, editar
+texto), então os itens existem como rascunho editável e a aprovação apenas trava.
+
+Correção pós-aprovação usa **reabertura controlada** (`aprovado → rascunho`, com motivo
+registrado em `bulletin_events`), não versionamento real. O campo `bulletins.version`
+fica reservado (`1`) para versionamento futuro.
+
+**Garantias preservadas (DT-003 continua válida):**
+- A prévia e o PDF (M6) leem **apenas** `bulletin_items` — nenhum acesso a `records`.
+- `bulletin_items.content` recebe **só** `publication_text`; campos sensíveis
+  (`original_description`, `coordination_note`, dados restritos/internos) nunca são copiados.
+- `assembleItems` só importa registros com `status='validado' AND classification='publicável'
+  AND include_in_bulletin=true` no período.
+- Edição em `records` após a aprovação não propaga para `bulletin_items`.
+
+**Por quê.** A apresentação de um boletim (ordem, visibilidade, texto editado) é
+específica do documento, não do registro. Mantê-la em `bulletin_items` evita poluir
+`records` e suporta corretamente BI por período e múltiplos boletins.
+
+**Consequências.**
+- `assembleItems` é idempotente: apaga e remonta os itens (só em rascunho).
+- A montagem é executada pela função SQL transacional
+  `public.assemble_bulletin_items(bulletin_id)` (0016), evitando BI parcialmente
+  remontado se houver falha entre apagar e reinserir itens.
+- Versionamento real (snapshots de versões anteriores) fica para fase futura, a registrar
+  como nova DT quando ocorrer.
+
 ---
 
 ## Próximas decisões esperadas (a registrar quando ocorrerem)
 
-- **DT-006 (M6)** — escolha definitiva do motor de PDF (`@react-pdf/renderer` planejado; reavaliar conforme requisitos visuais).
+- **DT-007 (M6)** — escolha definitiva do motor de PDF (`@react-pdf/renderer` planejado; reavaliar conforme requisitos visuais).

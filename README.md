@@ -4,7 +4,7 @@ Sistema web institucional para o **Curso de Formação de Oficiais (CFO)** da Ac
 
 Centraliza o registro da rotina acadêmico-militar, aplica validação da Coordenação e gera o **Boletim Interno** oficial em PDF a partir de itens validados e congelados.
 
-> **Estado atual:** Marco **M4 — Validação da Coordenação**. Já implementados: fundação técnica + auth (M0), cadastros institucionais (M1), escalas (M2), Livro de Dia + tabela central `records` (M3) e o fluxo de validação da Coordenação — fila com filtros, validar/devolver/classificar, edição do texto de publicação e histórico imutável em `record_events` (M4). Veja `Apoio/_decisoes.md` (DT-003) para a invariante do fluxo documental. A geração do Boletim Interno em PDF (`bulletins`/`bulletin_items`) entra a partir do M5.
+> **Estado atual:** Marco **M5 — Publicação do Boletim Interno**. Já implementados: fundação técnica + auth (M0), cadastros institucionais (M1), escalas (M2), Livro de Dia + tabela central `records` (M3), validação da Coordenação (M4) e criação/montagem/aprovação de Boletins Internos com prévia HTML em 5 partes (M5). Veja `Apoio/_decisoes.md` (DT-003/DT-006) para as invariantes do fluxo documental. A geração do PDF entra a partir do M6.
 
 ---
 
@@ -65,6 +65,9 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
    - `supabase/migrations/0011_daily_books.sql`
    - `supabase/migrations/0012_records.sql`
    - `supabase/migrations/0013_record_events.sql`
+   - `supabase/migrations/0014_bulletins.sql`
+   - `supabase/migrations/0015_bulletin_items_freeze.sql`
+   - `supabase/migrations/0016_assemble_bulletin_items_rpc.sql`
 
    > A `0003_seed_admin.sql` é aplicada no passo 5 (depende da criação manual do
    > usuário admin). A ordem importa: cada migração referencia objetos criados
@@ -127,13 +130,13 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
 
 | Marco | Entrega                                                        | Estado |
 |-------|----------------------------------------------------------------|--------|
-| M0    | Fundação técnica + autenticação                                | em curso |
-| M1    | Cadastros institucionais (alunos, pelotões, instrutores, etc.) | pendente |
-| M2    | Escalas                                                        | pendente |
-| M3    | Livro de Dia + Registros                                       | pendente |
-| M4    | Validação da Coordenação                                       | pendente |
-| M5    | Boletim Interno + prévia                                       | pendente |
-| M6    | Geração de PDF (a partir de `bulletin_items`)                  | pendente |
+| M0    | Fundação técnica + autenticação                                | implementado |
+| M1    | Cadastros institucionais (alunos, pelotões, instrutores, etc.) | implementado |
+| M2    | Escalas                                                        | implementado |
+| M3    | Livro de Dia + Registros                                       | implementado |
+| M4    | Validação da Coordenação                                       | implementado |
+| M5    | Boletim Interno + prévia                                       | implementado |
+| M6    | Geração de PDF (a partir de `bulletin_items`)                  | próximo |
 | M7    | Repositório documental                                         | pendente |
 | M8    | Auditoria + hardening                                          | pendente |
 
