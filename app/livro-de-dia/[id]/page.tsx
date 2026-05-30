@@ -15,6 +15,8 @@ import {
   upsertRecord,
   cancelRecord,
 } from "./actions";
+import { BULLETIN_PARTS } from "@/lib/records/options";
+import { RecordStatusBadge } from "@/components/admin/RecordStatusBadge";
 
 type DailyBook = {
   id: string;
@@ -76,14 +78,6 @@ const RECORD_TYPES = [
   { value: "outro", label: "Outro" },
 ];
 
-const BULLETIN_PARTS = [
-  { value: "1", label: "1ª — Legislação/Ensino" },
-  { value: "2", label: "2ª — Alteração de Pessoal" },
-  { value: "3", label: "3ª — Assuntos Gerais" },
-  { value: "4", label: "4ª — Justiça/Disciplina" },
-  { value: "5", label: "5ª — Comunicação/Avisos" },
-];
-
 const STATUS_FLOW: { [k: string]: { label: string; to: string }[] } = {
   rascunho: [{ label: "Enviar para revisão", to: "enviado" }],
   enviado: [
@@ -108,29 +102,6 @@ function studentLabel(r: Record): string {
   const s = pickOne(r.student);
   if (!s) return "—";
   return `#${s.student_number} ${s.war_name}`;
-}
-
-function recordStatusBadge(s: string): React.ReactNode {
-  const map: { [k: string]: string } = {
-    rascunho: "bg-gray-100 text-gray-700 ring-gray-200",
-    enviado: "bg-blue-50 text-blue-700 ring-blue-200",
-    "em revisão": "bg-amber-50 text-amber-700 ring-amber-200",
-    "pendente de correção": "bg-orange-50 text-orange-700 ring-orange-200",
-    validado: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    "incluído no BI": "bg-emerald-100 text-emerald-800 ring-emerald-300",
-    interno: "bg-purple-50 text-purple-700 ring-purple-200",
-    restrito: "bg-red-50 text-red-700 ring-red-200",
-    cancelado: "bg-gray-100 text-gray-500 ring-gray-200",
-    arquivado: "bg-gray-100 text-gray-500 ring-gray-200",
-  };
-  const cls = map[s] ?? map.rascunho;
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${cls}`}
-    >
-      {s}
-    </span>
-  );
 }
 
 type SearchParams = Promise<{ editRec?: string; ok?: string; err?: string }>;
@@ -452,7 +423,7 @@ export default async function DailyBookDetailPage({
                 <td className="px-4 py-3 font-mono text-gray-700">
                   {r.bulletin_part ?? "—"}
                 </td>
-                <td className="px-4 py-3">{recordStatusBadge(r.status)}</td>
+                <td className="px-4 py-3"><RecordStatusBadge status={r.status} /></td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex flex-wrap justify-end gap-2">
                     {r.status !== "cancelado" && (

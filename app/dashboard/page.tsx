@@ -31,7 +31,7 @@ export default async function DashboardPage() {
       <div>
         <h2 className="text-2xl font-semibold text-gray-900">Dashboard</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Marco M1 — cadastros institucionais disponíveis.
+          Marco M4 — validação da Coordenação disponível.
         </p>
       </div>
 
@@ -55,6 +55,17 @@ export default async function DashboardPage() {
             <h3 className="text-base font-semibold text-gray-900">Escalas</h3>
             <p className="mt-1 text-sm text-gray-500">
               Serviços diários, permanência, missões e apoio.
+            </p>
+          </Link>
+        )}
+        {canManageCadastros && (
+          <Link
+            href="/validacao"
+            className="block rounded-xl border border-gray-200 bg-white p-6 transition hover:border-gray-900 hover:shadow-sm"
+          >
+            <h3 className="text-base font-semibold text-gray-900">Validação</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Revisar, validar e classificar registros para o BI.
             </p>
           </Link>
         )}

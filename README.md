@@ -4,7 +4,7 @@ Sistema web institucional para o **Curso de Formação de Oficiais (CFO)** da Ac
 
 Centraliza o registro da rotina acadêmico-militar, aplica validação da Coordenação e gera o **Boletim Interno** oficial em PDF a partir de itens validados e congelados.
 
-> **Estado atual:** Marco **M0 — Fundação**. Apenas infraestrutura técnica + autenticação. Nenhuma funcionalidade de negócio implementada ainda. Veja `Apoio/_decisoes.md` (DT-003) para a arquitetura documental que será construída a partir do M1.
+> **Estado atual:** Marco **M4 — Validação da Coordenação**. Já implementados: fundação técnica + auth (M0), cadastros institucionais (M1), escalas (M2), Livro de Dia + tabela central `records` (M3) e o fluxo de validação da Coordenação — fila com filtros, validar/devolver/classificar, edição do texto de publicação e histórico imutável em `record_events` (M4). Veja `Apoio/_decisoes.md` (DT-003) para a invariante do fluxo documental. A geração do Boletim Interno em PDF (`bulletins`/`bulletin_items`) entra a partir do M5.
 
 ---
 
@@ -51,9 +51,24 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
    `.env.local` é ignorado pelo Git e **nunca** deve ser commitado.
 
 4. **Aplique as migrações Supabase.**
-   Pelo Dashboard → SQL Editor, execute em ordem:
+   Pelo Dashboard → SQL Editor, execute **em ordem, uma de cada vez** (todas são
+   idempotentes — `create table if not exists` / `create or replace`):
    - `supabase/migrations/0001_init.sql`
    - `supabase/migrations/0002_seed_profiles.sql`
+   - `supabase/migrations/0004_user_profile_name.sql`
+   - `supabase/migrations/0005_platoons.sql`
+   - `supabase/migrations/0006_military_staff.sql`
+   - `supabase/migrations/0007_locations.sql`
+   - `supabase/migrations/0008_disciplines.sql`
+   - `supabase/migrations/0009_students.sql`
+   - `supabase/migrations/0010_duty_scales.sql`
+   - `supabase/migrations/0011_daily_books.sql`
+   - `supabase/migrations/0012_records.sql`
+   - `supabase/migrations/0013_record_events.sql`
+
+   > A `0003_seed_admin.sql` é aplicada no passo 5 (depende da criação manual do
+   > usuário admin). A ordem importa: cada migração referencia objetos criados
+   > pelas anteriores (ex.: a `0005` usa `public.user_profile_name()` da `0004`).
 
 5. **Crie o administrador inicial** (procedimento manual, ver cabeçalho de `supabase/migrations/0003_seed_admin.sql`):
    - Dashboard → Authentication → Users → **Add user**:
