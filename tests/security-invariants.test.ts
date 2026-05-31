@@ -32,9 +32,18 @@ function listFiles(dir: string): string[] {
   });
 }
 
+function sqlStatements(source: string): string[] {
+  return source
+    .split(";")
+    .map((statement) => statement.trim())
+    .filter(Boolean)
+    .map((statement) => `${statement};`);
+}
+
 test("PDF and archive code do not read records directly", () => {
   const files = [
     ...listFiles("lib/pdf").filter((file) => file.endsWith(".ts") || file.endsWith(".tsx")),
+    "app/boletins/[id]/actions.ts",
     "app/boletins/[id]/pdf/route.ts",
     "app/boletins/[id]/arquivo/route.ts",
   ];
@@ -54,15 +63,13 @@ test("event tables remain append-only in migrations", () => {
     .map((file) => ({ file, source: read(file) }));
 
   for (const table of ["record_events", "bulletin_events"]) {
-    const policyRegex = new RegExp(
-      String.raw`create\s+policy[\s\S]*?on\s+public\.${table}\b[\s\S]*?;`,
-      "gi",
-    );
+    const eventTableRegex = new RegExp(String.raw`\bon\s+public\.${table}\b`, "i");
 
     for (const { file, source } of migrationSql) {
-      const statements = source.match(policyRegex) ?? [];
+      for (const statement of sqlStatements(source)) {
+        if (!/\bcreate\s+policy\b/i.test(statement)) continue;
+        if (!eventTableRegex.test(statement)) continue;
 
-      for (const statement of statements) {
         const forClause = statement.match(/\bfor\s+(select|insert|update|delete|all)\b/i);
         assert.ok(
           forClause,
