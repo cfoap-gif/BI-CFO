@@ -60,12 +60,14 @@ export async function createBulletin(formData: FormData) {
       throw error;
     }
 
-    await supabase.from("bulletin_events").insert({
+    const { error: eventError } = await supabase.from("bulletin_events").insert({
       bulletin_id: created.id,
       event_type: "criado",
       note: `BI ${type} criado (${start_date} a ${end_date}).`,
       created_by: user?.id ?? null,
     });
+    if (eventError) throw eventError;
+
     newId = created.id;
   } catch (e) {
     redirect(`${BASE}${buildQuery({ err: shortError(e) })}`);

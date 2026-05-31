@@ -86,6 +86,33 @@ test("event tables remain append-only in migrations", () => {
   }
 });
 
+test("event read policies are hardened by latest migration", () => {
+  const source = read("supabase/migrations/0019_event_read_hardening.sql");
+
+  assert.doesNotMatch(source, /using\s*\(\s*true\s*\)/i);
+
+  for (const table of ["record_events", "bulletin_events"]) {
+    const statement = sqlStatements(source).find(
+      (candidate) =>
+        /\bcreate\s+policy\b/i.test(candidate) &&
+        new RegExp(String.raw`\bon\s+public\.${table}\b`, "i").test(candidate),
+    );
+
+    assert.ok(statement, `0019 must recreate ${table}_read policy`);
+    assert.match(statement, /for\s+select/i);
+    assert.match(statement, /public\.user_profile_name\(\)/i);
+    assert.match(statement, /'Administrador'/);
+    assert.match(statement, /'Coordenação'/);
+  }
+});
+
+test("bulletin creation checks initial audit event insert", () => {
+  const source = read("app/boletins/actions.ts");
+
+  assert.match(source, /error:\s*eventError/);
+  assert.match(source, /if\s*\(\s*eventError\s*\)\s*throw\s+eventError/);
+});
+
 test("PDF routes keep authenticated admin-like guards", () => {
   for (const file of [
     "app/boletins/[id]/pdf/route.ts",
