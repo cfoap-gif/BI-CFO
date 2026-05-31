@@ -247,6 +247,47 @@ deploy e sem montar páginas linha por linha.
 
 ---
 
+## DT-008 — Repositório documental simples em Storage (M7/M8)
+
+**Status:** ativa
+**Marco:** M7/M8
+**Data:** 2026-05-31
+
+**Decisão.** O repositório documental do MVP usa um bucket privado do Supabase Storage
+chamado `bulletins`. Cada BI aprovado pode ter um PDF oficial vigente arquivado nesse
+bucket. A tabela `public.bulletins` guarda os metadados do arquivo vigente em
+`pdf_path`, `pdf_generated_at` e `pdf_generated_by`.
+
+O download do arquivo arquivado passa sempre por rota autenticada
+`/boletins/[id]/arquivo`, com guarda de perfil Administrador/Coordenação. O bucket não
+é público e não há exposição direta de URL pública no MVP.
+
+**Sobrescrita controlada.** Enquanto não houver versionamento real, gerar novamente o
+arquivo arquivado do mesmo BI aprovado sobrescreve o caminho vigente (`upsert: true`) e
+atualiza os metadados `pdf_*`. Isso é aceitável no MVP porque a reabertura do BI já
+registra evento em `bulletin_events`, e o campo `bulletins.version` permanece reservado
+para uma fase futura.
+
+**Não decidido neste marco.**
+- retenção legal avançada;
+- múltiplas versões arquivadas por BI;
+- hash criptográfico do arquivo;
+- assinatura digital;
+- acesso por perfis de consulta externos à Coordenação.
+
+**Por quê.** O M7 precisava garantir persistência e download autenticado do PDF oficial
+sem transformar o MVP em um GED completo. O modelo simples reduz risco operacional e
+mantém o caminho aberto para versionamento real depois.
+
+**Consequências.**
+- `pdf_path` aponta para o arquivo vigente, não para um histórico de versões.
+- O Storage é parte do fluxo oficial: `Livro de Dia → Registros → Validação →
+  Boletim Interno → PDF → Arquivo`.
+- Qualquer implementação futura de versionamento deve criar nova DT, provavelmente
+  adicionando tabela própria de versões de PDF.
+
+---
+
 ## Próximas decisões esperadas (a registrar quando ocorrerem)
 
-- **DT-008 (M7)** — estratégia do repositório documental: Storage, `pdf_url`, retenção e versionamento real.
+- **DT-009** — versionamento real de PDFs, retenção, hash e assinatura digital.
