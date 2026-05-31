@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  loadAuditActorDisplayMap,
+  UNKNOWN_AUDIT_ACTOR,
+} from "@/lib/audit/actors";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { FormFeedback } from "@/components/admin/FormFeedback";
 import { SubmitButton } from "@/components/admin/SubmitButton";
@@ -38,6 +42,7 @@ type EventRow = {
   from_status: string | null;
   to_status: string;
   note: string;
+  created_by: string | null;
   created_at: string;
 };
 
@@ -77,10 +82,14 @@ export default async function ValidacaoDetailPage({
 
   const { data: evRaw } = await supabase
     .from("record_events")
-    .select("id, event_type, from_status, to_status, note, created_at")
+    .select("id, event_type, from_status, to_status, note, created_by, created_at")
     .eq("record_id", id)
     .order("created_at", { ascending: false });
   const events = (evRaw ?? []) as EventRow[];
+  const actorNames = await loadAuditActorDisplayMap(
+    supabase,
+    events.map((ev) => ev.created_by),
+  );
 
   const student = pickOne(r.student);
   const platoon = pickOne(r.platoon);
@@ -155,7 +164,10 @@ export default async function ValidacaoDetailPage({
                     {ev.to_status}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {new Date(ev.created_at).toLocaleString("pt-BR")}
+                    {new Date(ev.created_at).toLocaleString("pt-BR")} · Autor:{" "}
+                    {ev.created_by
+                      ? (actorNames.get(ev.created_by) ?? UNKNOWN_AUDIT_ACTOR)
+                      : UNKNOWN_AUDIT_ACTOR}
                   </div>
                   {ev.note && (
                     <div className="mt-1 text-gray-700">{ev.note}</div>
