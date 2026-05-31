@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  loadAuditActorDisplayMap,
+  UNKNOWN_AUDIT_ACTOR,
+} from "@/lib/audit/actors";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { FormFeedback } from "@/components/admin/FormFeedback";
 import { SubmitButton } from "@/components/admin/SubmitButton";
@@ -45,6 +49,7 @@ type EventRow = {
   id: string;
   event_type: string;
   note: string;
+  created_by: string | null;
   created_at: string;
 };
 
@@ -81,10 +86,14 @@ export default async function BulletinDetailPage({
 
   const { data: evRaw } = await supabase
     .from("bulletin_events")
-    .select("id, event_type, note, created_at")
+    .select("id, event_type, note, created_by, created_at")
     .eq("bulletin_id", id)
     .order("created_at", { ascending: false });
   const events = (evRaw ?? []) as EventRow[];
+  const actorNames = await loadAuditActorDisplayMap(
+    supabase,
+    events.map((ev) => ev.created_by),
+  );
 
   const isDraft = b.status === "rascunho";
   const isApproved = b.status === "aprovado";
@@ -288,7 +297,10 @@ export default async function BulletinDetailPage({
             <li key={ev.id} className="border-l-2 border-gray-200 pl-3">
               <div className="font-medium text-gray-900">{ev.event_type}</div>
               <div className="text-xs text-gray-500">
-                {new Date(ev.created_at).toLocaleString("pt-BR")}
+                {new Date(ev.created_at).toLocaleString("pt-BR")} · Autor:{" "}
+                {ev.created_by
+                  ? (actorNames.get(ev.created_by) ?? UNKNOWN_AUDIT_ACTOR)
+                  : UNKNOWN_AUDIT_ACTOR}
               </div>
               {ev.note && <div className="mt-1 text-gray-700">{ev.note}</div>}
             </li>
