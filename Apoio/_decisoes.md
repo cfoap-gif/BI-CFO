@@ -250,7 +250,7 @@ deploy e sem montar páginas linha por linha.
 ## DT-008 — Repositório documental simples em Storage (M7/M8)
 
 **Status:** ativa
-**Marco:** M7/M8
+**Marco:** M7/M8 (ajuste M8.1 para perfil Consulta)
 **Data:** 2026-05-31
 
 **Decisão.** O repositório documental do MVP usa um bucket privado do Supabase Storage
@@ -258,10 +258,13 @@ chamado `bulletins`. Cada BI aprovado pode ter um PDF oficial vigente arquivado 
 bucket. A tabela `public.bulletins` guarda os metadados do arquivo vigente em
 `pdf_path`, `pdf_generated_at` e `pdf_generated_by`.
 
-A aplicação expõe o download do arquivo arquivado pela rota autenticada
-`/boletins/[id]/arquivo`, com guarda de perfil Administrador/Coordenação. O bucket não
-é público, não há exposição direta de URL pública no MVP, e a própria RLS do Storage
-também restringe leitura/escrita a usuários autenticados desses perfis.
+A aplicação expõe o download administrativo do arquivo arquivado pela rota autenticada
+`/boletins/[id]/arquivo`, com guarda de perfil Administrador/Coordenação. Para consulta
+documental, a rota autenticada `/repositorio/[id]/arquivo` permite leitura do PDF
+arquivado por Administrador, Coordenação e Consulta, desde que o BI esteja aprovado.
+O bucket não é público, não há exposição direta de URL pública no MVP, e a própria RLS
+do Storage restringe leitura a usuários autenticados desses perfis. Escrita e
+sobrescrita no Storage continuam restritas a Administrador/Coordenação.
 
 **Sobrescrita controlada.** Enquanto não houver versionamento real, gerar novamente o
 arquivo arquivado do mesmo BI aprovado sobrescreve o caminho vigente (`upsert: true`) e
@@ -275,7 +278,6 @@ uma fase futura.
 - múltiplas versões arquivadas por BI;
 - hash criptográfico do arquivo;
 - assinatura digital;
-- acesso por perfis de consulta externos à Coordenação.
 
 **Por quê.** O M7 precisava garantir persistência e download autenticado do PDF oficial
 sem transformar o MVP em um GED completo. O modelo simples reduz risco operacional e
@@ -283,6 +285,8 @@ mantém o caminho aberto para versionamento real depois.
 
 **Consequências.**
 - `pdf_path` aponta para o arquivo vigente, não para um histórico de versões.
+- O perfil Consulta pode ler BIs aprovados e baixar PDFs arquivados pelo repositório,
+  mas não gera, arquiva, reabre ou aprova boletins.
 - O Storage é parte do fluxo oficial: `Livro de Dia → Registros → Validação →
   Boletim Interno → PDF → Arquivo`.
 - Qualquer implementação futura de versionamento deve criar nova DT, provavelmente

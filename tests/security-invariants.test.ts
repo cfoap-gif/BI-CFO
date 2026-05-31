@@ -46,6 +46,9 @@ test("PDF and archive code do not read records directly", () => {
     "app/boletins/[id]/actions.ts",
     "app/boletins/[id]/pdf/route.ts",
     "app/boletins/[id]/arquivo/route.ts",
+    ...listFiles("app/repositorio").filter(
+      (file) => file.endsWith(".ts") || file.endsWith(".tsx"),
+    ),
   ];
 
   for (const file of files) {
@@ -123,6 +126,23 @@ test("PDF routes keep authenticated admin-like guards", () => {
     assert.match(source, /getCurrentProfileName\(\)/, `${file} must load profile`);
     assert.match(source, /isAdminLike\(profile\)/, `${file} must require Admin/Coordenação`);
   }
+});
+
+test("repository archive route allows read-only Consulta access", () => {
+  const source = read("app/repositorio/[id]/arquivo/route.ts");
+
+  assert.match(source, /supabase\.auth\.getUser\(\)/);
+  assert.match(source, /getCurrentProfileName\(\)/);
+  assert.match(source, /isAdminLike\(profile\)/);
+  assert.match(source, /profile\s*!==\s*"Consulta"/);
+  assert.match(source, /\.eq\("status",\s*"aprovado"\)/);
+
+  const migration = read("supabase/migrations/0020_bulletin_pdf_read_consulta.sql");
+  assert.match(migration, /for\s+select/i);
+  assert.match(migration, /public\.user_profile_name\(\)/i);
+  assert.match(migration, /'Administrador'/);
+  assert.match(migration, /'Coordenação'/);
+  assert.match(migration, /'Consulta'/);
 });
 
 test("service role key is not used by application code", () => {

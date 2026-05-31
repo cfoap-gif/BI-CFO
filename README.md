@@ -71,6 +71,7 @@ Centraliza o registro da rotina acadêmico-militar, aplica validação da Coorde
    - `supabase/migrations/0017_bulletin_pdf_archive.sql`
    - `supabase/migrations/0018_audit_actor_display.sql`
    - `supabase/migrations/0019_event_read_hardening.sql`
+   - `supabase/migrations/0020_bulletin_pdf_read_consulta.sql`
 
    > A `0003_seed_admin.sql` é aplicada no passo 5 (depende da criação manual do
    > usuário admin). A ordem importa: cada migração referencia objetos criados

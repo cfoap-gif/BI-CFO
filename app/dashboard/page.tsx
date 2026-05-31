@@ -25,13 +25,14 @@ export default async function DashboardPage() {
   const profile = await getCurrentProfileName();
   const canManageCadastros = isAdminLike(profile);
   const canOpenDailyBook = isDailyBookUser(profile);
+  const canAccessRepositorio = canManageCadastros || profile === "Consulta";
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-semibold text-gray-900">Dashboard</h2>
         <p className="mt-1 text-sm text-gray-500">
-          Marco M5 — publicação do Boletim Interno disponível.
+          Marco M8 — auditoria, PDF e repositório documental disponíveis.
         </p>
       </div>
 
@@ -77,6 +78,17 @@ export default async function DashboardPage() {
             <h3 className="text-base font-semibold text-gray-900">Boletins Internos</h3>
             <p className="mt-1 text-sm text-gray-500">
               Criar BI, montar prévia e aprovar a versão final.
+            </p>
+          </Link>
+        )}
+        {canAccessRepositorio && (
+          <Link
+            href="/repositorio"
+            className="block rounded-xl border border-gray-200 bg-white p-6 transition hover:border-gray-900 hover:shadow-sm"
+          >
+            <h3 className="text-base font-semibold text-gray-900">Repositório</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Consultar BIs aprovados e baixar PDFs arquivados.
             </p>
           </Link>
         )}
