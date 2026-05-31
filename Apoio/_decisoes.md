@@ -258,15 +258,17 @@ chamado `bulletins`. Cada BI aprovado pode ter um PDF oficial vigente arquivado 
 bucket. A tabela `public.bulletins` guarda os metadados do arquivo vigente em
 `pdf_path`, `pdf_generated_at` e `pdf_generated_by`.
 
-O download do arquivo arquivado passa sempre por rota autenticada
+A aplicação expõe o download do arquivo arquivado pela rota autenticada
 `/boletins/[id]/arquivo`, com guarda de perfil Administrador/Coordenação. O bucket não
-é público e não há exposição direta de URL pública no MVP.
+é público, não há exposição direta de URL pública no MVP, e a própria RLS do Storage
+também restringe leitura/escrita a usuários autenticados desses perfis.
 
 **Sobrescrita controlada.** Enquanto não houver versionamento real, gerar novamente o
 arquivo arquivado do mesmo BI aprovado sobrescreve o caminho vigente (`upsert: true`) e
-atualiza os metadados `pdf_*`. Isso é aceitável no MVP porque a reabertura do BI já
-registra evento em `bulletin_events`, e o campo `bulletins.version` permanece reservado
-para uma fase futura.
+atualiza os metadados `pdf_*`. O re-arquivamento em si mantém apenas o estado vigente do
+arquivo; mudanças de conteúdo exigem reabertura/aprovação do BI e essas transições ficam
+registradas em `bulletin_events`. O campo `bulletins.version` permanece reservado para
+uma fase futura.
 
 **Não decidido neste marco.**
 - retenção legal avançada;
