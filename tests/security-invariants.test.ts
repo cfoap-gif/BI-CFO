@@ -4,6 +4,16 @@ import { join } from "node:path";
 import { test } from "node:test";
 
 const ROOT = process.cwd();
+const PRUNED_DIRS = new Set([
+  ".git",
+  ".next",
+  ".turbo",
+  ".vercel",
+  "build",
+  "coverage",
+  "dist",
+  "node_modules",
+]);
 
 function read(path: string): string {
   return readFileSync(join(ROOT, path), "utf8");
@@ -14,7 +24,10 @@ function listFiles(dir: string): string[] {
   return readdirSync(absolute).flatMap((entry) => {
     const full = join(absolute, entry);
     const relative = join(dir, entry).replaceAll("\\", "/");
-    if (statSync(full).isDirectory()) return listFiles(relative);
+    if (statSync(full).isDirectory()) {
+      if (PRUNED_DIRS.has(entry)) return [];
+      return listFiles(relative);
+    }
     return [relative];
   });
 }
@@ -29,26 +42,41 @@ test("PDF and archive code do not read records directly", () => {
   for (const file of files) {
     assert.doesNotMatch(
       read(file),
-      /\.from\(["']records["']\)/,
+      /\.from\s*\(\s*["']records["']\s*\)/,
       `${file} must not query records; DT-003 requires PDF/archive to use bulletins + bulletin_items`,
     );
   }
 });
 
 test("event tables remain append-only in migrations", () => {
-  const recordEvents = read("supabase/migrations/0013_record_events.sql");
-  const bulletinEvents = read("supabase/migrations/0014_bulletins.sql");
+  const migrationSql = listFiles("supabase/migrations")
+    .filter((file) => file.endsWith(".sql"))
+    .map((file) => ({ file, source: read(file) }));
 
-  assert.doesNotMatch(
-    recordEvents,
-    /record_events[^;]*(for update|for delete)/i,
-    "record_events must not have UPDATE/DELETE policies",
-  );
-  assert.doesNotMatch(
-    bulletinEvents,
-    /bulletin_events[^;]*(for update|for delete)/i,
-    "bulletin_events must not have UPDATE/DELETE policies",
-  );
+  for (const table of ["record_events", "bulletin_events"]) {
+    const policyRegex = new RegExp(
+      String.raw`create\s+policy[\s\S]*?on\s+public\.${table}\b[\s\S]*?;`,
+      "gi",
+    );
+
+    for (const { file, source } of migrationSql) {
+      const statements = source.match(policyRegex) ?? [];
+
+      for (const statement of statements) {
+        const forClause = statement.match(/\bfor\s+(select|insert|update|delete|all)\b/i);
+        assert.ok(
+          forClause,
+          `${file} policy on public.${table} must declare FOR SELECT or FOR INSERT; omitted FOR defaults to ALL`,
+        );
+
+        const operation = forClause[1].toLowerCase();
+        assert.ok(
+          operation === "select" || operation === "insert",
+          `${file} policy on public.${table} must be append-only; FOR ${operation.toUpperCase()} is not allowed`,
+        );
+      }
+    }
+  }
 });
 
 test("PDF routes keep authenticated admin-like guards", () => {
